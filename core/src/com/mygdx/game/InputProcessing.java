@@ -11,27 +11,6 @@ public class InputProcessing implements InputProcessor {
 
     public InputProcessing() {
         controls = new IntMap<>();
-
-        controls.put(Input.Keys.A, new Runnable() {
-            @Override
-            public void run() {
-                MyGdxGame.API().getGameScreen().worldMap.generateMap(1);
-            }
-        });
-
-        controls.put(Input.Keys.S, new Runnable() {
-            @Override
-            public void run() {
-                MyGdxGame.API().getGameScreen().worldMap.generateMap(2);
-            }
-        });
-
-        controls.put(Input.Keys.D, new Runnable() {
-            @Override
-            public void run() {
-                MyGdxGame.API().getGameScreen().worldMap.generateMap(3);
-            }
-        });
     }
 
     @Override
@@ -64,10 +43,10 @@ public class InputProcessing implements InputProcessor {
             Vector2 screenToTile = CoordinateUtils.screenToTile(screenX, screenY);
             int row = (int) screenToTile.x;
             int col = (int) screenToTile.y;
-            MyGdxGame.API().getGameScreen().selectTile(row, col);
-            MyGdxGame.API().getGameScreen().rightClickDown(row, col);
+            MyGdxGame.API().getWorld().selectTile(row, col);
+            MyGdxGame.API().getWorld().rightClickDown(row, col);
         }
-        MyGdxGame.API().getGameScreen().touchDown(CoordinateUtils.screenToWorld(screenX, screenY));
+        MyGdxGame.API().getWorld().touchDown(CoordinateUtils.screenToTile(screenX, screenY));
         return false;
     }
 
@@ -85,7 +64,7 @@ public class InputProcessing implements InputProcessor {
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         Vector2 screenToTile = CoordinateUtils.screenToTile(screenX, screenY);
-        MyGdxGame.API().getGameScreen().highlightTile(screenToTile);
+        MyGdxGame.API().getWorld().highlightTile(screenToTile);
         return false;
     }
 

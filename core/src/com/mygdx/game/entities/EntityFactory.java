@@ -19,10 +19,8 @@ public class EntityFactory {
         return thief;
     }
 
-
-
     public static DoubleSidedEntity BAT() {
-        DoubleSidedEntity bat = new DoubleSidedEntity(30);
+        DoubleSidedEntity bat = new DoubleSidedEntity(28);
         bat.setSpeed(15);
         return bat;
     }

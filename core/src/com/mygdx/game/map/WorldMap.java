@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import static com.mygdx.game.map.Textures.*;
 
 public class WorldMap {
-    public static final int MAP_WIDTH = 20;
-    public static final int MAP_HEIGHT = 20;
+    public static final int MAP_WIDTH = 64;
+    public static final int MAP_HEIGHT = 64;
     private final Tile[][] tileMap;
     private final Tile[][] itemsMap;
 
@@ -55,7 +55,7 @@ public class WorldMap {
     }
 
     public void generateMap() {
-        generateMap(3);
+        generateMap(1);
     }
 
     public void generateMap(int octaveCount) {
@@ -89,19 +89,20 @@ public class WorldMap {
                 float value = rows[j];
                 Tile tile = tileMap[i][j];
                 if (value < 0.4f && tile.isPassable()) {
-                    tile.setCost((int) (tile.getCost() * 1.5f));
-                    tile.setPassable(true);
+                    tile.setCost((int) (tile.getCost() * 1.1f));
+//                    tile.setPassable(false);
                     addItem(new Tile(PLANT, i + 1, j + 1, true, 0));
                 }
-
-//                float mapValue = mapNoise[i][j];
-//                if (mapValue > 0.98f) {
-//                    if (mapValue < 0.99f) {
-//                        generateLeftBridge(i, j);
-//                    } else {
-//                        generateRightBridge(i, j);
-//                    }
-//                }
+                /*
+                float mapValue = mapNoise[i][j];
+                if (mapValue > 0.98f) {
+                    if (mapValue < 0.99f) {
+                        generateLeftBridge(i, j);
+                    } else {
+                        generateRightBridge(i, j);
+                    }
+                }
+                */
             }
         }
     }
@@ -190,5 +191,13 @@ public class WorldMap {
             tileMap[row - k][col].setCost(1);
             k++;
         }
+    }
+
+    public boolean isPassable(int row, int col) {
+        // check for bounds
+        if (row < 0 || row >= MAP_WIDTH || col < 0 || col >= MAP_HEIGHT) {
+            return false;
+        }
+        return tileMap[row][col].isPassable();
     }
 }

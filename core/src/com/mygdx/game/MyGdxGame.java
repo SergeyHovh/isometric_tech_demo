@@ -17,6 +17,8 @@ public class MyGdxGame extends Game {
     @Override
     public void create() {
         GameScreen gameScreen = new GameScreen(new SpriteBatch());
+        World world = new World();
+        API().setWorld(world);
         API().setGameScreen(gameScreen);
         setScreen(gameScreen);
     }

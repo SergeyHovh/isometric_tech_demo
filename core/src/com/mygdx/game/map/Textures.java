@@ -19,6 +19,7 @@ public class Textures {
         highlightedEntities = TextureRegion.split(new Texture("IsometricTRPGAssetPack_OutlinedEntities.png"), TEXTURE_TILE_WIDTH, TEXTURE_TILE_HEIGHT);
     }
 
+    public static final TextureRegion GREEN_INDICATOR = mapIndicators[0][0];
     public static final TextureRegion WHITE_SELECTOR = mapIndicators[2][0];
     public static final TextureRegion YELLOW_SELECTOR = mapIndicators[2][1];
 

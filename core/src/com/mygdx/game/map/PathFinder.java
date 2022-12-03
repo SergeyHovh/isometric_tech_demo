@@ -127,9 +127,9 @@ public class PathFinder {
 
         @Override
         public float estimate(Node node, Node endNode) {
-//            return node.tilePos.dst(endNode.tilePos);
+            return node.tilePos.dst(endNode.tilePos);
             // manhattan distance
-            return Math.abs(node.tilePos.x - endNode.tilePos.x) + Math.abs(node.tilePos.y - endNode.tilePos.y);
+//            return Math.abs(node.tilePos.x - endNode.tilePos.x) + Math.abs(node.tilePos.y - endNode.tilePos.y);
         }
     }
 

@@ -1,10 +1,11 @@
 package com.mygdx.game.map;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.ColorUtil;
 import com.mygdx.game.CoordinateUtils;
-import com.mygdx.game.GameScreen;
 
 public class Tile {
     private TextureRegion region;
@@ -12,6 +13,8 @@ public class Tile {
     private float x, y;
     private boolean passable;
     private int cost;
+    private Color color = Color.WHITE;
+    private final Color tmpColor = new Color();
 
     public Tile(TextureRegion region, int row, int col, boolean passable, int cost) {
         this.region = region;
@@ -19,11 +22,18 @@ public class Tile {
         this.col = col;
         this.passable = passable;
         this.cost = cost;
-        convert();
+        convertCoordinates();
     }
 
     public void render(SpriteBatch batch, float delta) {
-        batch.draw(region, x, y);
+        if (color != Color.WHITE) {
+            ColorUtil.copyColor(tmpColor, batch.getColor());
+            batch.setColor(color);
+            batch.draw(region, x, y);
+            batch.setColor(tmpColor);
+        } else {
+            batch.draw(region, x, y);
+        }
     }
 
     public int getRow() {
@@ -69,12 +79,22 @@ public class Tile {
     public void setPosition(Vector2 position) {
         row = (int) position.x;
         col = (int) position.y;
-        convert();
+        convertCoordinates();
     }
 
-    private void convert() {
+    public void setPosition(int row, int col) {
+        this.row = row;
+        this.col = col;
+        convertCoordinates();
+    }
+
+    private void convertCoordinates() {
         Vector2 screenPos = CoordinateUtils.tileToScreen(row - 1, col - 1);
         x = screenPos.x;
         y = screenPos.y;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
     }
 }

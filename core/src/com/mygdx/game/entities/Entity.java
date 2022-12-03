@@ -7,14 +7,14 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.CoordinateUtils;
-import com.mygdx.game.GameScreen;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.World;
 import com.mygdx.game.map.Textures;
 import com.mygdx.game.map.WorldMap;
 
 public class Entity {
     public enum State {
-        IDLE(0), ATTACK(1);
+        IDLE(0), ATTACK(1), DEAD(2);
 
         private final int index;
 
@@ -23,7 +23,8 @@ public class Entity {
         }
     }
 
-    private static final Interpolation moveInterpolation = Interpolation.circle;
+    private static final Interpolation moveInterpolation = Interpolation.smooth;
+    protected float offsetX, offsetY;
     protected float x, y;
     protected float targetX, targetY;
     private int tileX, tileY;
@@ -32,7 +33,7 @@ public class Entity {
 
     private State state;
 
-    private Animation<TextureRegion>[][] currentPool;
+    private Animation<TextureRegion>[][] currentAnimationPool;
     private final Animation<TextureRegion>[][] animationPool;
     private final Animation<TextureRegion>[][] highlightedAnimationPool;
     private float stateTime = 0;
@@ -40,19 +41,21 @@ public class Entity {
     private int index;
 
     public Entity(int... id) {
-        this(MyGdxGame.API().getGameScreen(), id);
+        this(MyGdxGame.API().getWorld(), id);
     }
 
-    public Entity(GameScreen screen, int... ids) {
-        screen.registerEntity(this);
-        animationPool = new Animation[2][2];
-        highlightedAnimationPool = new Animation[2][2];
+    public Entity(World world, int... ids) {
+        world.registerEntity(this);
+        animationPool = new Animation[2][3];
+        highlightedAnimationPool = new Animation[2][3];
+        TextureRegion deadTexture = Textures.entities[Textures.entities.length - 1][0];
 
         for (int i = 0; i < ids.length; i++) {
             int id = ids[i];
             TextureRegion[] entityAnimations = Textures.entities[id];
             animationPool[i][State.IDLE.index] = new Animation<>(1 / 4f, entityAnimations[0], entityAnimations[1]);
             animationPool[i][State.ATTACK.index] = new Animation<>(1 / 4f, entityAnimations[2], entityAnimations[3]);
+            animationPool[i][State.DEAD.index] = new Animation<>(1 / 4f, deadTexture);
         }
 
         for (int i = 0; i < ids.length; i++) {
@@ -60,8 +63,9 @@ public class Entity {
             TextureRegion[] entityAnimations = Textures.highlightedEntities[id];
             highlightedAnimationPool[i][State.IDLE.index] = new Animation<>(1 / 4f, entityAnimations[0], entityAnimations[1]);
             highlightedAnimationPool[i][State.ATTACK.index] = new Animation<>(1 / 4f, entityAnimations[2], entityAnimations[3]);
+            highlightedAnimationPool[i][State.DEAD.index] = new Animation<>(1 / 4f, deadTexture);
         }
-        currentPool = animationPool;
+        currentAnimationPool = animationPool;
 
         convertTileToScreen();
         setState(State.IDLE);
@@ -83,11 +87,11 @@ public class Entity {
             y = moveInterpolation.apply(y, targetY, speed * delta);
         }
         // Get current frame of animation for the current stateTime
-        TextureRegion keyFrame = currentPool[index][state.index].getKeyFrame(stateTime, true);
+        TextureRegion keyFrame = currentAnimationPool[index][state.index].getKeyFrame(stateTime, true);
         width = keyFrame.getRegionWidth();
         height = keyFrame.getRegionHeight();
         batch.draw(keyFrame,
-                x, y,
+                x + offsetX, y + offsetX,
                 width / 2f, height / 2f,
                 width, height,
                 scaleX, 1, 0);
@@ -172,10 +176,10 @@ public class Entity {
     }
 
     public void select() {
-        currentPool = highlightedAnimationPool;
+        currentAnimationPool = highlightedAnimationPool;
     }
 
     public void deselect() {
-        currentPool = animationPool;
+        currentAnimationPool = animationPool;
     }
 }
