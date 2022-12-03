@@ -60,7 +60,7 @@ public class PathFinder {
         Node startNode = null;
         Node endNode = null;
 
-        for (Node node : graph.getNodes()) {
+        for (Node node : graph.getNodes().toArray(Node.class)) {
             if (start.dst(node.tilePos) == 0) {
                 startNode = node;
             }

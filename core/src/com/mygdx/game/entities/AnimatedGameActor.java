@@ -124,7 +124,9 @@ public class AnimatedGameActor extends GameActor {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     if (x == 0 && y == 0) continue;
+                    GameActor actorOnNewPos = MyGdxGame.API().getWorld().containsGameActor(toX + x, toY + y);
                     if (!MyGdxGame.API().getWorld().isPassable(toX + x, toY + y)) continue;
+                    if (actorOnNewPos != null && actorOnNewPos != this) continue;
                     float distance = Vector2.dst(getTileX(), getTileY(), toX  + x, toY + y);
                     if (distance < closestDistance) {
                         closestDistance = distance;
