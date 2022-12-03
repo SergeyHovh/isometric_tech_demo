@@ -51,12 +51,12 @@ public class EventManager {
     public <E extends Event> void fireEvent(E event) {
         for (Observer observer : OBSERVERS.toArray(Observer.class)) {
             Gdx.app.postRunnable(() -> {
-                onNotify(observer, event);
+                notifyObserver(observer, event);
             });
         }
     }
 
-    private <E extends Event> void onNotify(Observer observer, E event) {
+    private <E extends Event> void notifyObserver(Observer observer, E event) {
         Method[] declaredMethods = observer.getClass().getDeclaredMethods();
         for (Method method : declaredMethods) {
             Annotation[] declaredAnnotations = method.getDeclaredAnnotations();
