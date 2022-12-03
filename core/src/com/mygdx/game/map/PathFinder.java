@@ -77,6 +77,7 @@ public class PathFinder {
         }
         boolean found = nodeIndexedAStarPathFinder.searchNodePath(startNode, endNode, dh, path);
 
+/*
         if (!found) {
             for (Connection<Node> connection : endNode.connections) {
                 found = nodeIndexedAStarPathFinder.searchNodePath(startNode, connection.getToNode(), dh, path);
@@ -85,6 +86,7 @@ public class PathFinder {
                 }
             }
         }
+        */
 
         return path;
     }

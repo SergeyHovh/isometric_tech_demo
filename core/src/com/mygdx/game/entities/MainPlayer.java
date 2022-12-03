@@ -2,7 +2,7 @@ package com.mygdx.game.entities;
 
 import com.mygdx.game.MyGdxGame;
 
-public class MainPlayer extends DoubleSidedEntity {
+public class MainPlayer extends AnimatedGameActor {
     public MainPlayer() {
         super(0);
         speed = 20;
@@ -11,8 +11,8 @@ public class MainPlayer extends DoubleSidedEntity {
     public void onTouchDown(float row, float col) {
         if (MyGdxGame.API().getWorld().isPassable((int) row, (int) col)) {
             findPathAndMove((int) row, (int) col);
-            Entity entity = MyGdxGame.API().getWorld().containsEntity((int) row, (int) col);
-            attackEntity((DoubleSidedEntity) entity);
+            GameActor gameActor = MyGdxGame.API().getWorld().containsGameActor((int) row, (int) col);
+            attackEntity((AnimatedGameActor) gameActor);
         }
     }
 }

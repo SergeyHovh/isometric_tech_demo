@@ -9,7 +9,7 @@ import com.mygdx.game.ColorUtil;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.map.PathFinder;
 
-public class DoubleSidedEntity extends Entity {
+public class AnimatedGameActor extends GameActor {
     protected GraphPath<PathFinder.Node> path;
     protected int currentPathIndex = 0;
     private Color color = Color.WHITE;
@@ -18,10 +18,10 @@ public class DoubleSidedEntity extends Entity {
     private int damage = 2;
     private float cooldown = 0.4f;
     private float attackCooldownTimer = 0;
-    private DoubleSidedEntity attackEntity;
+    private AnimatedGameActor attackEntity;
     private boolean shouldAttack = false;
 
-    public DoubleSidedEntity(int id) {
+    public AnimatedGameActor(int id) {
         super(id, id + 1);
     }
 
@@ -110,13 +110,13 @@ public class DoubleSidedEntity extends Entity {
         move(moveX, moveY);
     }
 
-    public void followEntity(Entity entity) {
-        findPathAndMove(entity.getTileX(), entity.getTileY());
+    public void followGameActor(GameActor gameActor) {
+        findPathAndMove(gameActor.getTileX(), gameActor.getTileY());
     }
 
     public void findPathAndMove(int toX, int toY) {
-        Entity entity = MyGdxGame.API().getWorld().containsEntity(toX, toY);
-        if (entity != null) {
+        GameActor gameActor = MyGdxGame.API().getWorld().containsGameActor(toX, toY);
+        if (gameActor != null) {
             // find the closest adjacent tile other than the selected one
             int closestX = 0;
             int closestY = 0;
@@ -156,13 +156,14 @@ public class DoubleSidedEntity extends Entity {
         this.color = color;
     }
 
-    public void attackEntity(DoubleSidedEntity entity) {
+    public void attackEntity(AnimatedGameActor gameActor) {
+        if (gameActor == this) return;
         shouldAttack = true;
-        attackEntity = entity;
+        attackEntity = gameActor;
         // turn towards the enemy
-        if (entity == null) return;
-        int moveX = entity.getTileX() - getTileX();
-        int moveY = entity.getTileY() - getTileY();
+        if (gameActor == null) return;
+        int moveX = gameActor.getTileX() - getTileX();
+        int moveY = gameActor.getTileY() - getTileY();
         turnTowards(moveX, moveY);
     }
 }

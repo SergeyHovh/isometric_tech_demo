@@ -12,7 +12,7 @@ import com.mygdx.game.World;
 import com.mygdx.game.map.Textures;
 import com.mygdx.game.map.WorldMap;
 
-public class Entity {
+public class GameActor {
     public enum State {
         IDLE(0), ATTACK(1), DEAD(2);
 
@@ -40,11 +40,11 @@ public class Entity {
     protected float scaleX = 1;
     private int index;
 
-    public Entity(int... id) {
+    public GameActor(int... id) {
         this(MyGdxGame.API().getWorld(), id);
     }
 
-    public Entity(World world, int... ids) {
+    public GameActor(World world, int... ids) {
         world.registerEntity(this);
         animationPool = new Animation[2][3];
         highlightedAnimationPool = new Animation[2][3];
@@ -98,6 +98,7 @@ public class Entity {
     }
 
     public void move(int row, int col) {
+        if (state == State.DEAD) return;
         tileX += row;
         tileY += col;
         if (tileX < 0) {
