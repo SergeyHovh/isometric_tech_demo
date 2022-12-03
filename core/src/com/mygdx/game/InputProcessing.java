@@ -4,6 +4,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
+import com.mygdx.game.events.EventManager;
+import com.mygdx.game.events.MapClickEvent;
 
 public class InputProcessing implements InputProcessor {
 
@@ -11,15 +13,16 @@ public class InputProcessing implements InputProcessor {
 
     public InputProcessing() {
         controls = new IntMap<>();
+        controls.put(Input.Keys.A, () -> {
+        });
+
+        controls.put(Input.Keys.S, () -> {
+        });
     }
 
     @Override
     public boolean keyDown(int keycode) {
-        controls.get(keycode, new Runnable() {
-            @Override
-            public void run() {
-
-            }
+        controls.get(keycode, () -> {
         }).run();
         return false;
     }
@@ -36,17 +39,15 @@ public class InputProcessing implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        MapClickEvent mapClickEvent = EventManager.getInstance().obtainEvent(MapClickEvent.class);
+        mapClickEvent.setPosition(CoordinateUtils.screenToTile(screenX, screenY));
         if (button == Input.Buttons.LEFT) {
-            MyGdxGame.API().getGameScreen().moveCamera();
+            mapClickEvent.setClickButton(MapClickEvent.MouseClickButton.LEFT);
         }
         if (button == Input.Buttons.RIGHT) {
-            Vector2 screenToTile = CoordinateUtils.screenToTile(screenX, screenY);
-            int row = (int) screenToTile.x;
-            int col = (int) screenToTile.y;
-            MyGdxGame.API().getWorld().selectTile(row, col);
-            MyGdxGame.API().getWorld().rightClickDown(row, col);
+            mapClickEvent.setClickButton(MapClickEvent.MouseClickButton.RIGHT);
         }
-        MyGdxGame.API().getWorld().touchDown(CoordinateUtils.screenToTile(screenX, screenY));
+        EventManager.getInstance().fireEvent(mapClickEvent);
         return false;
     }
 

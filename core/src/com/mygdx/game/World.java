@@ -1,5 +1,6 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -9,6 +10,10 @@ import com.mygdx.game.entities.AnimatedGameActor;
 import com.mygdx.game.entities.GameActor;
 import com.mygdx.game.entities.GameActorFactory;
 import com.mygdx.game.entities.MainPlayer;
+import com.mygdx.game.events.EventHandler;
+import com.mygdx.game.events.EventManager;
+import com.mygdx.game.events.MapClickEvent;
+import com.mygdx.game.events.Observer;
 import com.mygdx.game.map.PathFinder;
 import com.mygdx.game.map.Textures;
 import com.mygdx.game.map.Tile;
@@ -16,7 +21,7 @@ import com.mygdx.game.map.WorldMap;
 
 import java.util.Comparator;
 
-public class World {
+public class World implements Observer {
     private final WorldMap worldMap;
     private final Array<GameActor> entities;
     private MainPlayer mainPlayer;
@@ -27,6 +32,7 @@ public class World {
     private boolean tileSelected = false;
 
     public World() {
+        EventManager.getInstance().registerObserver(this);
         worldMap = new WorldMap();
         worldMap.generateMap(1);
         entities = new Array<>();
@@ -124,5 +130,14 @@ public class World {
             }
         }
         return null;
+    }
+
+    @EventHandler
+    public void onMapClick(MapClickEvent event) {
+        touchDown(event.getClickPosition());
+        selectTile(event.getRow(), event.getCol());
+        if (event.getClickButton() == MapClickEvent.MouseClickButton.RIGHT) {
+            rightClickDown(event.getRow(), event.getCol());
+        }
     }
 }
