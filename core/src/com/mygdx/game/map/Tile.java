@@ -16,6 +16,14 @@ public class Tile {
     private Color color = Color.WHITE;
     private final Color tmpColor = new Color();
 
+    public Tile(TextureRegion region) {
+        this(region, -1, -1);
+    }
+
+    public Tile(TextureRegion region, int row, int col) {
+        this(region, row, col, true, 0);
+    }
+
     public Tile(TextureRegion region, int row, int col, boolean passable, int cost) {
         this.region = region;
         this.row = row;

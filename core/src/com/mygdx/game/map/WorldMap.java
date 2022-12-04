@@ -1,14 +1,31 @@
 package com.mygdx.game.map;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.functions.DoubleIntConsumer;
 
 import static com.mygdx.game.map.Textures.*;
 
 public class WorldMap {
-    public static final int MAP_WIDTH = 64;
-    public static final int MAP_HEIGHT = 64;
+    public static final int MAP_WIDTH = 32;
+    public static final int MAP_HEIGHT = 32;
+    private static final int INITIAL_CAPACITY = MAP_WIDTH * MAP_HEIGHT / 4;
+    private int prevSelectionRow = -1;
+    private int prevSelectionCol = -1;
+    private final Pool<Tile> selectionTilePool = new Pool<Tile>(INITIAL_CAPACITY, MAP_WIDTH * MAP_HEIGHT) {
+        @Override
+        protected Tile newObject() {
+            return new Tile(GREEN_INDICATOR);
+        }
+    };
+    private final Tile selector;
+    private final Tile selected;
+
     private final Tile[][] tileMap;
     private final Tile[][] itemsMap;
+    private final Tile[][] selectionLayer;
 
     private final Tile[][] firstFloor;
     private final Tile[][] secondFloor;
@@ -17,10 +34,17 @@ public class WorldMap {
     public WorldMap() {
         tileMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
         itemsMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
+        selectionLayer = new Tile[MAP_WIDTH][MAP_HEIGHT];
 
         firstFloor = new Tile[MAP_WIDTH][MAP_HEIGHT];
         secondFloor = new Tile[MAP_WIDTH][MAP_HEIGHT];
         thirdFloor = new Tile[MAP_WIDTH][MAP_HEIGHT];
+
+        selector = new Tile(Textures.WHITE_SELECTOR);
+        selected = new Tile(Textures.YELLOW_SELECTOR);
+
+        selectionTilePool.fill(INITIAL_CAPACITY);
+
         generateMap();
     }
 
@@ -90,26 +114,20 @@ public class WorldMap {
                 Tile tile = tileMap[i][j];
                 if (value < 0.4f && tile.isPassable()) {
                     tile.setCost((int) (tile.getCost() * 1.1f));
-//                    tile.setPassable(false);
-                    addItem(new Tile(PLANT, i + 1, j + 1, true, 0));
+                    addItem(new Tile(PLANT, i + 1, j + 1));
                 }
-                /*
-                float mapValue = mapNoise[i][j];
-                if (mapValue > 0.98f) {
-                    if (mapValue < 0.99f) {
-                        generateLeftBridge(i, j);
-                    } else {
-                        generateRightBridge(i, j);
-                    }
-                }
-                */
             }
         }
     }
 
     public void render(SpriteBatch batch, float delta) {
-        renderMap(batch, delta);
-        renderItems(batch, delta);
+        renderMapLayer(tileMap, batch, delta);
+        renderMapLayer(itemsMap, batch, delta);
+        selector.render(batch, delta);
+        if (hasActiveSelection()) {
+            selected.render(batch, delta);
+        }
+        renderMapLayer(selectionLayer, batch, delta);
     }
 
     public void addItem(Tile item) {
@@ -199,5 +217,85 @@ public class WorldMap {
             return false;
         }
         return tileMap[row][col].isPassable();
+    }
+
+    public void selectTile(int row, int col) {
+        if (row < 0 || row >= MAP_WIDTH || col < 0 || col >= MAP_HEIGHT) {
+            return;
+        }
+        selected.setPosition(row, col);
+        prevSelectionRow = row;
+        prevSelectionCol = col;
+    }
+
+    public void selectTileRange(int startRow, int startCol,
+                                int endRow, int endCol,
+                                DoubleIntConsumer selectionCallback,
+                                DoubleIntConsumer deselectCallback) {
+        if (!isInBounds(startRow, startCol)) {
+            return;
+        }
+
+        if (!isInBounds(endRow, endCol)) {
+            return;
+        }
+
+        // set start row the min, end row the max
+        if (startRow > endRow) {
+            int temp = startRow;
+            startRow = endRow;
+            endRow = temp;
+        }
+
+        // set start col the min, end col the max
+        if (startCol > endCol) {
+            int temp = startCol;
+            startCol = endCol;
+            endCol = temp;
+        }
+
+        // clear previous selection
+        clearRangeSelection(deselectCallback);
+
+        // select new tiles
+        for (int i = startRow; i <= endRow; i++) {
+            for (int j = startCol; j <= endCol; j++) {
+                Tile tile = selectionTilePool.obtain();
+                tile.setPosition(i + 1, j + 1);
+                selectionLayer[i][j] = tile;
+                selectionCallback.accept(i, j);
+            }
+        }
+    }
+
+    public void clearRangeSelection(DoubleIntConsumer deselectCallback) {
+        for (int i = 0; i < selectionLayer.length; i++) {
+            Tile[] tiles = selectionLayer[i];
+            for (int j = 0; j < tiles.length; j++) {
+                Tile tile = tiles[j];
+                if (tile == null) continue;
+                selectionTilePool.free(tile);
+                selectionLayer[i][j] = null;
+                deselectCallback.accept(i, j);
+            }
+        }
+    }
+
+    public void clearSelection() {
+        prevSelectionRow = -1;
+        prevSelectionCol = -1;
+    }
+
+    private boolean hasActiveSelection() {
+        return prevSelectionRow != -1 && prevSelectionCol != -1;
+    }
+
+    public void highlightTile(int row, int col) {
+        selector.setPosition(row + 1, col + 1);
+        if (MyGdxGame.API().getWorld().isPassable(row, col)) {
+            selector.setColor(Color.WHITE);
+        } else {
+            selector.setColor(Color.RED);
+        }
     }
 }

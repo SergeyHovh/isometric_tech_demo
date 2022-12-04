@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.reflect.ClassReflection;
 import com.badlogic.gdx.utils.reflect.ReflectionException;
 import com.mygdx.game.events.Event;
 import com.mygdx.game.events.MapClickEvent;
+import com.mygdx.game.events.MouseDraggedEvent;
 import com.mygdx.game.events.MouseMovedEvent;
 
 import java.lang.reflect.AccessibleObject;
@@ -28,6 +29,7 @@ public class EventManager {
     private EventManager() {
         addPool(MouseMovedEvent.class);
         addPool(MapClickEvent.class);
+        addPool(MouseDraggedEvent.class);
     }
 
     public static void quickFire(Class<? extends Event> clazz) {
