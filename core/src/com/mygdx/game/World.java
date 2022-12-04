@@ -1,6 +1,5 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -10,10 +9,11 @@ import com.mygdx.game.entities.AnimatedGameActor;
 import com.mygdx.game.entities.GameActor;
 import com.mygdx.game.entities.GameActorFactory;
 import com.mygdx.game.entities.MainPlayer;
-import com.mygdx.game.events.EventHandler;
-import com.mygdx.game.events.EventManager;
 import com.mygdx.game.events.MapClickEvent;
-import com.mygdx.game.events.Observer;
+import com.mygdx.game.events.MouseMovedEvent;
+import com.mygdx.game.events.management.EventHandler;
+import com.mygdx.game.events.management.EventManager;
+import com.mygdx.game.events.management.Observer;
 import com.mygdx.game.map.PathFinder;
 import com.mygdx.game.map.Textures;
 import com.mygdx.game.map.Tile;
@@ -22,7 +22,7 @@ import com.mygdx.game.map.WorldMap;
 import java.util.Comparator;
 
 public class World implements Observer {
-    private final WorldMap worldMap;
+    public final WorldMap worldMap;
     private final Array<GameActor> entities;
     private MainPlayer mainPlayer;
     private final Comparator<GameActor> isometricComparator;
@@ -38,12 +38,7 @@ public class World implements Observer {
         entities = new Array<>();
         selector = new Tile(Textures.WHITE_SELECTOR, 0, 0, true, 0);
         selected = new Tile(Textures.YELLOW_SELECTOR, 0, 0, true, 0);
-        isometricComparator = new Comparator<GameActor>() {
-            @Override
-            public int compare(GameActor o1, GameActor o2) {
-                return -(int) (o1.getY() - o2.getY());
-            }
-        };
+        isometricComparator = (o1, o2) -> Float.compare(o2.getY(), o1.getY());
         PathFinder.generateGraph(worldMap.getTileMap(), true);
     }
 
@@ -86,22 +81,18 @@ public class World implements Observer {
         return worldMap.isInBounds(row, col);
     }
 
-    public void touchDown(Vector2 tile) {
-/*        for (Entity entity : entities.toArray(Entity.class)) {
+    public void selectActor(Vector2 tile) {
+        for (GameActor entity : entities.toArray(GameActor.class)) {
             float dx = entity.getTileX() - tile.x;
             float dy = entity.getTileY() - tile.y;
             if (dx * dx + dy * dy < 1) {
                 entity.select();
                 break;
             }
-        }*/
+        }
     }
 
-    public void rightClickDown(int row, int col) {
-        mainPlayer.onTouchDown(row, col);
-    }
-
-    public void selectTile(int row, int col) {
+    private void selectTile(int row, int col) {
         if (!MyGdxGame.API().getWorld().isInBounds(row, col)) return;
         if (!MyGdxGame.API().getWorld().isPassable(row, col)) return;
         tileSelected = true;
@@ -133,11 +124,17 @@ public class World implements Observer {
     }
 
     @EventHandler
-    public void onMapClick(MapClickEvent event) {
-        touchDown(event.getClickPosition());
-        selectTile(event.getRow(), event.getCol());
+    public void onMapClickEvent(MapClickEvent event) {
         if (event.getClickButton() == MapClickEvent.MouseClickButton.RIGHT) {
-            rightClickDown(event.getRow(), event.getCol());
+            selectTile(event.getRow(), event.getCol());
         }
+        if (event.getClickButton() == MapClickEvent.MouseClickButton.LEFT) {
+            selectActor(event.getClickPosition());
+        }
+    }
+
+    @EventHandler
+    public void onMouseMovedEvent(MouseMovedEvent event) {
+        highlightTile(event.getPosition());
     }
 }

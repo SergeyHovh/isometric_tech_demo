@@ -9,6 +9,7 @@ import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.CoordinateUtils;
+import com.mygdx.game.MyGdxGame;
 
 public class PathFinder {
     private static Graph graph;
@@ -162,6 +163,10 @@ public class PathFinder {
 
         @Override
         public float getCost() {
+            // check if the node has an enemy on it and if so, increase the cost
+            if (MyGdxGame.API().getWorld().containsGameActor((int) toNode.tilePos.x, (int) toNode.tilePos.y) != null) {
+                return 9999;
+            }
             return toNode.cost;
         }
 

@@ -4,8 +4,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.IntMap;
-import com.mygdx.game.events.EventManager;
+import com.mygdx.game.events.management.EventManager;
 import com.mygdx.game.events.MapClickEvent;
+import com.mygdx.game.events.MouseMovedEvent;
 
 public class InputProcessing implements InputProcessor {
 
@@ -64,8 +65,9 @@ public class InputProcessing implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        Vector2 screenToTile = CoordinateUtils.screenToTile(screenX, screenY);
-        MyGdxGame.API().getWorld().highlightTile(screenToTile);
+        MouseMovedEvent mouseMovedEvent = EventManager.getInstance().obtainEvent(MouseMovedEvent.class);
+        mouseMovedEvent.setPosition(CoordinateUtils.screenToTile(screenX, screenY));
+        EventManager.getInstance().fireEvent(mouseMovedEvent);
         return false;
     }
 

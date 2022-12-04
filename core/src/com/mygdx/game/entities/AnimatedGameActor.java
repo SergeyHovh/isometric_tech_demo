@@ -31,18 +31,16 @@ public class AnimatedGameActor extends GameActor {
         turnTowards(row, col);
     }
 
-    private void turnTowards(int row, int col) {
-        if (row == 1) {
+    protected void turnTowards(int row, int col) {
+        if (row > 0) {
             scaleX = 1;
-        } else if (row == -1) {
+        } else if (row < 0) {
             scaleX = -1;
         }
-        if (col == 1) {
+        if (col > 0) {
             changeFrameSet(1);
-            scaleX = -1;
-        } else if (col == -1) {
+        } else if (col < 0) {
             changeFrameSet(0);
-            scaleX = 1;
         }
     }
 

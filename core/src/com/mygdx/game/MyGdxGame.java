@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.events.management.EventManager;
 
 public class MyGdxGame extends Game {
 
@@ -31,5 +32,9 @@ public class MyGdxGame extends Game {
     @Override
     public void dispose() {
         super.dispose();
+
+        API().getGameScreen().dispose();
+        EventManager.getInstance().dispose();
+        api = null;
     }
 }
