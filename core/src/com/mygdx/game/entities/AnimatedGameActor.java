@@ -68,9 +68,8 @@ public class AnimatedGameActor extends GameActor {
 
         if (offsetX == 0 && offsetY == 0) {
             setColor(Color.WHITE);
-            deselect();
         }
-        if (path == null) {
+        if (path == null && isNear(attackEntity)) {
             if (attackEntity == null) {
                 shouldAttack = false;
             }
@@ -93,6 +92,16 @@ public class AnimatedGameActor extends GameActor {
         if (Math.abs(x - targetX) <= 0.1f && Math.abs(y - targetY) <= 0.1f) {
             chooseNextDestination();
         }
+    }
+
+    private boolean isNear(AnimatedGameActor attackEntity) {
+        if (attackEntity == null) {
+            return false;
+        }
+        // calculate tile distance
+        int dx = Math.abs(attackEntity.getTileX() - getTileX());
+        int dy = Math.abs(attackEntity.getTileY() - getTileY());
+        return dx <= 1 && dy <= 1;
     }
 
     private void chooseNextDestination() {

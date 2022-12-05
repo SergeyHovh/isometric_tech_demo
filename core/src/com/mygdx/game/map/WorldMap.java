@@ -6,6 +6,8 @@ import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.functions.DoubleIntConsumer;
 
+import java.util.Arrays;
+
 import static com.mygdx.game.map.Textures.*;
 
 public class WorldMap {
@@ -27,51 +29,47 @@ public class WorldMap {
     private final Tile[][] itemsMap;
     private final Tile[][] selectionLayer;
 
-    private final Tile[][] firstFloor;
-    private final Tile[][] secondFloor;
-    private final Tile[][] thirdFloor;
-
+    private final MapLayer firstFloor;
+    private final MapLayer secondFloor;
+    private final MapLayer thirdFloor;
     public WorldMap() {
         tileMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
         itemsMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
         selectionLayer = new Tile[MAP_WIDTH][MAP_HEIGHT];
 
-        firstFloor = new Tile[MAP_WIDTH][MAP_HEIGHT];
-        secondFloor = new Tile[MAP_WIDTH][MAP_HEIGHT];
-        thirdFloor = new Tile[MAP_WIDTH][MAP_HEIGHT];
+        firstFloor = new MapLayer();
+        secondFloor = new MapLayer(1);
+        thirdFloor = new MapLayer(2);
 
         selector = new Tile(Textures.WHITE_SELECTOR);
         selected = new Tile(Textures.YELLOW_SELECTOR);
 
         selectionTilePool.fill(INITIAL_CAPACITY);
 
-        generateMap();
+//        generateMap();
+        generateLayeredMap();
     }
 
     public void generateLayeredMap() {
         float[][] mapNoise = PerlinNoiseGenerator.generatePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 2);
         // fill maps with nulls
-        for (int row = 0; row < MAP_WIDTH; row++) {
-            for (int col = 0; col < MAP_HEIGHT; col++) {
-                firstFloor[row][col] = null;
-                secondFloor[row][col] = null;
-                thirdFloor[row][col] = null;
-            }
-        }
+        firstFloor.clearLayer();
+        secondFloor.clearLayer();
+        thirdFloor.clearLayer();
 
         for (int i = 0; i < mapNoise.length; i++) {
             for (int j = 0; j < mapNoise[0].length; j++) {
                 float value = mapNoise[i][j];
                 if (value < 0.2) {
-                    thirdFloor[i][j] = new Tile(GRASS, i + 2, j + 2, true, 1);
+                    thirdFloor.addTile(new Tile(GRASS), i, j);
                 }
                 if (value < 0.3) {
-                    secondFloor[i][j] = new Tile(GRASS, i + 1, j + 1, true, 1);
+                    secondFloor.addTile(new Tile(GRASS), i, j);
                 }
                 if (value < 0.67) {
-                    firstFloor[i][j] = new Tile(GRASS, i, j, true, 1);
+                    firstFloor.addTile(new Tile(GRASS), i, j);
                 } else {
-                    firstFloor[i][j] = new Tile(WATER, i, j, false, 0);
+                    firstFloor.addTile(new Tile(WATER), i, j);
                 }
             }
         }
@@ -121,6 +119,7 @@ public class WorldMap {
     }
 
     public void render(SpriteBatch batch, float delta) {
+//        renderLevelMap(batch, delta);
         renderMapLayer(tileMap, batch, delta);
         renderMapLayer(itemsMap, batch, delta);
         selector.render(batch, delta);
@@ -149,9 +148,9 @@ public class WorldMap {
     }
 
     private void renderLevelMap(SpriteBatch batch, float delta) {
-        renderMapLayer(firstFloor, batch, delta);
-        renderMapLayer(secondFloor, batch, delta);
-        renderMapLayer(thirdFloor, batch, delta);
+        firstFloor.render(batch, delta);
+        secondFloor.render(batch, delta);
+        thirdFloor.render(batch, delta);
     }
 
     private void renderMapLayer(Tile[][] map, SpriteBatch batch, float delta) {
@@ -296,6 +295,45 @@ public class WorldMap {
             selector.setColor(Color.WHITE);
         } else {
             selector.setColor(Color.RED);
+        }
+    }
+
+    private static class MapLayer {
+        private final Tile[][] map;
+        private int layer;
+
+        public MapLayer() {
+            this(0);
+        }
+
+        public MapLayer(int layer) {
+            map = createMapLayer(layer);
+        }
+
+        private Tile[][] createMapLayer(int layer) {
+            this.layer = layer;
+            return new Tile[MAP_WIDTH][MAP_HEIGHT];
+        }
+
+        private void clearLayer() {
+            for (Tile[] tiles : map) {
+                Arrays.fill(tiles, null);
+            }
+        }
+
+        public void addTile(Tile tile, int row, int col) {
+            tile.setPosition(row + layer, col + layer);
+            map[row][col] = tile;
+        }
+
+        private void render(SpriteBatch batch, float delta) {
+            for (int i = map.length - 1; i >= 0; i--) {
+                for (int j = map[i].length - 1; j >= 0; j--) {
+                    Tile tile = map[i][j];
+                    if (tile == null) continue;
+                    tile.render(batch, delta);
+                }
+            }
         }
     }
 }
