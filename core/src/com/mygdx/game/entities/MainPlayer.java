@@ -10,7 +10,7 @@ public class MainPlayer extends AnimatedGameActor implements Observer {
     public MainPlayer() {
         super(0);
         EventManager.getInstance().registerObserver(this);
-        speed = 20;
+        speed = 3;
     }
 
     @EventHandler

@@ -1,5 +1,6 @@
 package com.mygdx.game.entities;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -89,7 +90,7 @@ public class AnimatedGameActor extends GameActor {
             }
             return;
         }
-        if (Math.abs(x - targetX) <= 0.1f && Math.abs(y - targetY) <= 0.1f) {
+        if (Vector2.dst(x, y, targetX, targetY) <= 8) {
             chooseNextDestination();
         }
     }
@@ -134,7 +135,7 @@ public class AnimatedGameActor extends GameActor {
                     GameActor actorOnNewPos = MyGdxGame.API().getWorld().containsGameActor(toX + x, toY + y);
                     if (!MyGdxGame.API().getWorld().isPassable(toX + x, toY + y)) continue;
                     if (actorOnNewPos != null && actorOnNewPos != this) continue;
-                    float distance = Vector2.dst(getTileX(), getTileY(), toX  + x, toY + y);
+                    float distance = Vector2.dst(getTileX(), getTileY(), toX + x, toY + y);
                     if (distance < closestDistance) {
                         closestDistance = distance;
                         closestX = x;

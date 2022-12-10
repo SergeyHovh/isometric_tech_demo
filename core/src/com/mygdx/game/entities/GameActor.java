@@ -23,7 +23,7 @@ public class GameActor {
         }
     }
 
-    private static final Interpolation moveInterpolation = Interpolation.smooth;
+    private static final Interpolation moveInterpolation = Interpolation.linear;
     protected float offsetX, offsetY;
     protected float x, y;
     protected float targetX, targetY;
@@ -82,9 +82,17 @@ public class GameActor {
         stateTime += delta; // Accumulate elapsed animation time
         if (x != targetX) {
             x = moveInterpolation.apply(x, targetX, speed * delta);
+            float dx = Math.abs(x - targetX);
+            if (dx < 0.1f) {
+                x = targetX;
+            }
         }
         if (y != targetY) {
             y = moveInterpolation.apply(y, targetY, speed * delta);
+            float dy = Math.abs(y - targetY);
+            if (dy < 0.1f) {
+                y = targetY;
+            }
         }
         // Get current frame of animation for the current stateTime
         TextureRegion keyFrame = currentAnimationPool[index][state.index].getKeyFrame(stateTime, true);
