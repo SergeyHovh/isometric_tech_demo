@@ -10,7 +10,7 @@ import com.mygdx.game.CoordinateUtils;
 public class Tile {
     private TextureRegion region;
     private int row, col;
-    private float x, y;
+    private float x, y, z = 0;
     private boolean passable;
     private int cost;
     private Color color = Color.WHITE;
@@ -37,11 +37,19 @@ public class Tile {
         if (color != Color.WHITE) {
             ColorUtil.copyColor(tmpColor, batch.getColor());
             batch.setColor(color);
-            batch.draw(region, x, y);
+            batch.draw(region, x, y + getZOffset());
             batch.setColor(tmpColor);
         } else {
-            batch.draw(region, x, y);
+            batch.draw(region, x, y + getZOffset());
         }
+    }
+
+    public float getZOffset() {
+        return z * Textures.TEXTURE_TILE_HEIGHT;
+    }
+
+    public void setZ(float z) {
+        this.z = z;
     }
 
     public int getRow() {
@@ -104,5 +112,9 @@ public class Tile {
 
     public void setColor(Color color) {
         this.color = color;
+    }
+
+    public float getZ() {
+        return z;
     }
 }

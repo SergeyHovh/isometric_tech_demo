@@ -2,9 +2,13 @@ package com.mygdx.game.map;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.CoordinateUtils;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.functions.DoubleIntConsumer;
+import com.mygdx.game.functions.DoubleIntObjectConsumer;
 
 import java.util.Arrays;
 
@@ -14,6 +18,7 @@ public class WorldMap {
     public static final int MAP_WIDTH = 32;
     public static final int MAP_HEIGHT = 32;
     private static final int INITIAL_CAPACITY = MAP_WIDTH * MAP_HEIGHT / 4;
+    private static final Vector2 CENTER = CoordinateUtils.tileToScreen(MAP_WIDTH / 2, MAP_HEIGHT / 2);
     private int prevSelectionRow = -1;
     private int prevSelectionCol = -1;
     private final Pool<Tile> selectionTilePool = new Pool<Tile>(INITIAL_CAPACITY, MAP_WIDTH * MAP_HEIGHT) {
@@ -32,6 +37,8 @@ public class WorldMap {
     private final MapLayer firstFloor;
     private final MapLayer secondFloor;
     private final MapLayer thirdFloor;
+    private float time = 0;
+
     public WorldMap() {
         tileMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
         itemsMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
@@ -45,9 +52,6 @@ public class WorldMap {
         selected = new Tile(Textures.YELLOW_SELECTOR);
 
         selectionTilePool.fill(INITIAL_CAPACITY);
-
-//        generateMap();
-        generateLayeredMap();
     }
 
     public void generateLayeredMap() {
@@ -119,8 +123,13 @@ public class WorldMap {
     }
 
     public void render(SpriteBatch batch, float delta) {
-//        renderLevelMap(batch, delta);
-        renderMapLayer(tileMap, batch, delta);
+        time += delta;
+        renderMapLayer(tileMap, batch, delta, (i, j, tile) -> {
+            if (!tile.getRegion().equals(WATER)) return;
+            float dst = Vector2.dst(CENTER.x, CENTER.y, tile.getX(), tile.getY());
+            double z = MathUtils.cos(3 * dst + time * MathUtils.HALF_PI) / TEXTURE_TILE_HEIGHT;
+            tile.setZ((float) z);
+        });
         renderMapLayer(itemsMap, batch, delta);
         selector.render(batch, delta);
         if (hasActiveSelection()) {
@@ -153,13 +162,20 @@ public class WorldMap {
         thirdFloor.render(batch, delta);
     }
 
-    private void renderMapLayer(Tile[][] map, SpriteBatch batch, float delta) {
+    private void renderMapLayer(Tile[][] map, SpriteBatch batch, float delta, DoubleIntObjectConsumer<Tile> consumer) {
         for (int i = map.length - 1; i >= 0; i--) {
             for (int j = map[i].length - 1; j >= 0; j--) {
-                if (map[i][j] == null) continue;
-                map[i][j].render(batch, delta);
+                Tile tile = map[i][j];
+                if (tile == null) continue;
+                consumer.accept(i, j, tile);
+                tile.render(batch, delta);
             }
         }
+    }
+
+    private void renderMapLayer(Tile[][] map, SpriteBatch batch, float delta) {
+        renderMapLayer(map, batch, delta, (a, b, object) -> {
+        });
     }
 
     public Tile getMapTile(int row, int col) {

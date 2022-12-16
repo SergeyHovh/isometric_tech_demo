@@ -75,6 +75,11 @@ public class GameActor {
         this.index = index;
         if (index < 0 || index > animationPool.length - 1) {
             Gdx.app.error("Entity#changeFrameSet", "index out of bounds: " + index);
+            if (index < 0) {
+                this.index = 0;
+            } else {
+                this.index = animationPool.length - 1;
+            }
         }
     }
 
@@ -98,8 +103,9 @@ public class GameActor {
         TextureRegion keyFrame = currentAnimationPool[index][state.index].getKeyFrame(stateTime, true);
         width = keyFrame.getRegionWidth();
         height = keyFrame.getRegionHeight();
+        float mapZ = MyGdxGame.API().getWorld().worldMap.getMapTile(tileX, tileY).getZOffset();
         batch.draw(keyFrame,
-                x + offsetX, y + offsetX,
+                x + offsetX, y + offsetX + mapZ,
                 width / 2f, height / 2f,
                 width, height,
                 scaleX, 1, 0);
