@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.CoordinateUtils;
 import com.mygdx.game.MyGdxGame;
-import com.mygdx.game.World;
-import com.mygdx.game.map.Textures;
-import com.mygdx.game.map.WorldMap;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.CoordinateUtils;
+import com.mygdx.game.world.World;
+import com.mygdx.game.world.map.Textures;
 
 public class GameActor {
     public enum State {
@@ -121,11 +121,11 @@ public class GameActor {
         if (tileY < 0) {
             tileY = 0;
         }
-        if (tileX > WorldMap.MAP_WIDTH - 1) {
-            tileX = WorldMap.MAP_WIDTH - 1;
+        if (tileX > Constants.Map.WIDTH - 1) {
+            tileX = Constants.Map.WIDTH - 1;
         }
-        if (tileY > WorldMap.MAP_HEIGHT - 1) {
-            tileY = WorldMap.MAP_HEIGHT - 1;
+        if (tileY > Constants.Map.HEIGHT - 1) {
+            tileY = Constants.Map.HEIGHT - 1;
         }
         convertTileToScreen();
     }

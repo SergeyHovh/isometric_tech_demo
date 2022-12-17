@@ -1,9 +1,9 @@
-package com.mygdx.game;
+package com.mygdx.game.util;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.map.Textures;
+import com.mygdx.game.MyGdxGame;
 
 public class CoordinateUtils {
     private static Vector3 tempVec3 = new Vector3();
@@ -17,15 +17,15 @@ public class CoordinateUtils {
     }
 
     public static Vector2 tileToScreen(int row, int col) {
-        float x = (row - col) * Textures.TEXTURE_TILE_WIDTH / 2.001f;
-        float y = (row + col) * Textures.TEXTURE_TILE_HEIGHT / 4f;
+        float x = (row - col) * Constants.Tile.TEXTURE_TILE_WIDTH / 2.001f;
+        float y = (row + col) * Constants.Tile.TEXTURE_TILE_HEIGHT / 4f;
         return new Vector2(x, y);
     }
 
     public static Vector2 screenToTile(float screenX, float screenY) {
         Vector2 world = screenToWorld(screenX, screenY);
-        float alpha = Textures.TEXTURE_TILE_WIDTH / 2f;
-        float beta = Textures.TEXTURE_TILE_HEIGHT / 4f;
+        float alpha = Constants.Tile.TEXTURE_TILE_WIDTH / 2f;
+        float beta = Constants.Tile.TEXTURE_TILE_HEIGHT / 4f;
 
         float x = world.x - 6.4f;
         float y = world.y - 4.8f;

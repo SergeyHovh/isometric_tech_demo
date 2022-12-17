@@ -1,27 +1,28 @@
-package com.mygdx.game.map;
+package com.mygdx.game.world.map;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.game.CoordinateUtils;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.functions.DoubleIntConsumer;
 import com.mygdx.game.functions.DoubleIntObjectConsumer;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.CoordinateUtils;
 
 import java.util.Arrays;
 
-import static com.mygdx.game.map.Textures.*;
+import static com.mygdx.game.util.Constants.Map.HEIGHT;
+import static com.mygdx.game.util.Constants.Map.WIDTH;
+import static com.mygdx.game.world.map.Textures.*;
 
 public class WorldMap {
-    public static final int MAP_WIDTH = 32;
-    public static final int MAP_HEIGHT = 32;
-    private static final int INITIAL_CAPACITY = MAP_WIDTH * MAP_HEIGHT / 4;
-    private static final Vector2 CENTER = CoordinateUtils.tileToScreen(MAP_WIDTH / 2, MAP_HEIGHT / 2);
+    private static final int INITIAL_CAPACITY = WIDTH * HEIGHT / 4;
+    private static final Vector2 CENTER = CoordinateUtils.tileToScreen(WIDTH / 2, HEIGHT / 2);
     private int prevSelectionRow = -1;
     private int prevSelectionCol = -1;
-    private final Pool<Tile> selectionTilePool = new Pool<Tile>(INITIAL_CAPACITY, MAP_WIDTH * MAP_HEIGHT) {
+    private final Pool<Tile> selectionTilePool = new Pool<>(INITIAL_CAPACITY, WIDTH * HEIGHT) {
         @Override
         protected Tile newObject() {
             return new Tile(GREEN_INDICATOR);
@@ -40,9 +41,9 @@ public class WorldMap {
     private float time = 0;
 
     public WorldMap() {
-        tileMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
-        itemsMap = new Tile[MAP_WIDTH][MAP_HEIGHT];
-        selectionLayer = new Tile[MAP_WIDTH][MAP_HEIGHT];
+        tileMap = new Tile[WIDTH][HEIGHT];
+        itemsMap = new Tile[WIDTH][HEIGHT];
+        selectionLayer = new Tile[WIDTH][HEIGHT];
 
         firstFloor = new MapLayer();
         secondFloor = new MapLayer(1);
@@ -55,7 +56,7 @@ public class WorldMap {
     }
 
     public void generateLayeredMap() {
-        float[][] mapNoise = PerlinNoiseGenerator.generatePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 2);
+        float[][] mapNoise = PerlinNoiseGenerator.generatePerlinNoise(WIDTH, HEIGHT, 2);
         // fill maps with nulls
         firstFloor.clearLayer();
         secondFloor.clearLayer();
@@ -85,10 +86,10 @@ public class WorldMap {
     }
 
     public void generateMap(int octaveCount) {
-        float[][] mapNoise = PerlinNoiseGenerator.generatePerlinNoise(MAP_WIDTH, MAP_HEIGHT, octaveCount);
+        float[][] mapNoise = PerlinNoiseGenerator.generatePerlinNoise(WIDTH, HEIGHT, octaveCount);
         // fill maps with nulls
-        for (int row = 0; row < MAP_WIDTH; row++) {
-            for (int col = 0; col < MAP_HEIGHT; col++) {
+        for (int row = 0; row < WIDTH; row++) {
+            for (int col = 0; col < HEIGHT; col++) {
                 tileMap[row][col] = null;
                 itemsMap[row][col] = null;
             }
@@ -107,7 +108,7 @@ public class WorldMap {
             }
         }
 
-        float[][] itemsMap = PerlinNoiseGenerator.generatePerlinNoise(MAP_WIDTH, MAP_HEIGHT, 3);
+        float[][] itemsMap = PerlinNoiseGenerator.generatePerlinNoise(WIDTH, HEIGHT, 3);
 
         for (int i = 0; i < itemsMap.length; i++) {
             float[] rows = itemsMap[i];
@@ -127,7 +128,7 @@ public class WorldMap {
         renderMapLayer(tileMap, batch, delta, (i, j, tile) -> {
             if (!tile.getRegion().equals(WATER)) return;
             float dst = Vector2.dst(CENTER.x, CENTER.y, tile.getX(), tile.getY());
-            double z = MathUtils.cos(3 * dst + time * MathUtils.HALF_PI) / TEXTURE_TILE_HEIGHT;
+            double z = MathUtils.cos(3 * dst + time * MathUtils.HALF_PI) / Constants.Tile.TEXTURE_TILE_HEIGHT;
             tile.setZ((float) z);
         });
         renderMapLayer(itemsMap, batch, delta);
@@ -142,7 +143,7 @@ public class WorldMap {
         int row = item.getRow();
         int col = item.getCol();
         // check for out of bounds
-        if (row < 0 || row >= MAP_WIDTH || col < 0 || col >= MAP_HEIGHT) {
+        if (row < 0 || row >= WIDTH || col < 0 || col >= HEIGHT) {
             return;
         }
         itemsMap[row][col] = item;
@@ -187,12 +188,12 @@ public class WorldMap {
     }
 
     public boolean isInBounds(int row, int col) {
-        return row >= 0 && row < MAP_WIDTH && col >= 0 && col < MAP_HEIGHT;
+        return row >= 0 && row < WIDTH && col >= 0 && col < HEIGHT;
     }
 
     private void generateLeftBridge(int row, int col) {
         int k = 0;
-        while (col + k < MAP_HEIGHT && !tileMap[row][col + k].isPassable()) {
+        while (col + k < HEIGHT && !tileMap[row][col + k].isPassable()) {
             itemsMap[row][col + k] = new Tile(BRIDGE_LEFT, row, col + k, true, 15);
             tileMap[row][col + k].setPassable(true);
             tileMap[row][col + k].setCost(1);
@@ -210,7 +211,7 @@ public class WorldMap {
 
     private void generateRightBridge(int row, int col) {
         int k = 0;
-        while (row + k < MAP_WIDTH && !tileMap[row + k][col].isPassable()) {
+        while (row + k < WIDTH && !tileMap[row + k][col].isPassable()) {
             itemsMap[row + k][col] = new Tile(BRIDGE_RIGHT, row + k, col, true, 15);
             tileMap[row + k][col].setPassable(true);
             tileMap[row + k][col].setCost(1);
@@ -228,14 +229,14 @@ public class WorldMap {
 
     public boolean isPassable(int row, int col) {
         // check for bounds
-        if (row < 0 || row >= MAP_WIDTH || col < 0 || col >= MAP_HEIGHT) {
+        if (row < 0 || row >= WIDTH || col < 0 || col >= HEIGHT) {
             return false;
         }
         return tileMap[row][col].isPassable();
     }
 
     public void selectTile(int row, int col) {
-        if (row < 0 || row >= MAP_WIDTH || col < 0 || col >= MAP_HEIGHT) {
+        if (row < 0 || row >= WIDTH || col < 0 || col >= HEIGHT) {
             return;
         }
         selected.setPosition(row, col);
@@ -328,7 +329,7 @@ public class WorldMap {
 
         private Tile[][] createMapLayer(int layer) {
             this.layer = layer;
-            return new Tile[MAP_WIDTH][MAP_HEIGHT];
+            return new Tile[WIDTH][HEIGHT];
         }
 
         private void clearLayer() {

@@ -1,4 +1,4 @@
-package com.mygdx.game.map;
+package com.mygdx.game.world.map;
 
 import com.badlogic.gdx.math.MathUtils;
 

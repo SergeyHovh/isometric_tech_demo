@@ -1,4 +1,4 @@
-package com.mygdx.game.map;
+package com.mygdx.game.world.map;
 
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
@@ -8,8 +8,8 @@ import com.badlogic.gdx.ai.pfa.indexed.IndexedAStarPathFinder;
 import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.CoordinateUtils;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.util.CoordinateUtils;
 
 public class PathFinder {
     private static Graph graph;

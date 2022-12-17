@@ -1,5 +1,8 @@
 package com.mygdx.game;
 
+import com.mygdx.game.screens.GameScreen;
+import com.mygdx.game.world.World;
+
 public class API {
     private GameScreen gameScreen;
     private World world;

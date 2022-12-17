@@ -1,14 +1,14 @@
-package com.mygdx.game.map;
+package com.mygdx.game.world.map;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.ColorUtil;
-import com.mygdx.game.CoordinateUtils;
+import com.mygdx.game.util.ColorUtil;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.util.CoordinateUtils;
 
 public class Tile {
-    private TextureRegion region;
+    private MapTextureRegion region;
     private int row, col;
     private float x, y, z = 0;
     private boolean passable;
@@ -16,15 +16,15 @@ public class Tile {
     private Color color = Color.WHITE;
     private final Color tmpColor = new Color();
 
-    public Tile(TextureRegion region) {
+    public Tile(MapTextureRegion region) {
         this(region, -1, -1);
     }
 
-    public Tile(TextureRegion region, int row, int col) {
+    public Tile(MapTextureRegion region, int row, int col) {
         this(region, row, col, true, 0);
     }
 
-    public Tile(TextureRegion region, int row, int col, boolean passable, int cost) {
+    public Tile(MapTextureRegion region, int row, int col, boolean passable, int cost) {
         this.region = region;
         this.row = row;
         this.col = col;
@@ -45,7 +45,7 @@ public class Tile {
     }
 
     public float getZOffset() {
-        return z * Textures.TEXTURE_TILE_HEIGHT;
+        return z * Constants.Tile.TEXTURE_TILE_HEIGHT;
     }
 
     public void setZ(float z) {
@@ -76,11 +76,11 @@ public class Tile {
         this.passable = passable;
     }
 
-    public void setRegion(TextureRegion region) {
+    public void setRegion(MapTextureRegion region) {
         this.region = region;
     }
 
-    public TextureRegion getRegion() {
+    public MapTextureRegion getRegion() {
         return region;
     }
 

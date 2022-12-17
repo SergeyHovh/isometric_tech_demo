@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -6,13 +6,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
-import com.mygdx.game.map.Textures;
+import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.input.InputProcessing;
+import com.mygdx.game.util.Constants;
+import com.mygdx.game.world.map.Textures;
 
 public class GameScreen implements Screen {
-
-    public static final int width = 1600;
-    public static final int height = 900;
-
     private static final float MIN_ZOOM = 0.1f;
     private static final float MAX_ZOOM = 0.3f;
 
@@ -24,7 +23,7 @@ public class GameScreen implements Screen {
     public GameScreen(SpriteBatch batch) {
         this.batch = batch;
         Gdx.input.setInputProcessor(new InputProcessing());
-        camera = new OrthographicCamera(width, height);
+        camera = new OrthographicCamera(Constants.Screen.WIDTH, Constants.Screen.HEIGHT);
     }
 
     @Override

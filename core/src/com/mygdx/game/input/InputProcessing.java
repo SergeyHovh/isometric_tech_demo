@@ -1,13 +1,18 @@
-package com.mygdx.game;
+package com.mygdx.game.input;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.utils.IntMap;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.events.MapClickEvent;
 import com.mygdx.game.events.MouseDraggedEvent;
 import com.mygdx.game.events.MouseMovedEvent;
 import com.mygdx.game.events.management.EventManager;
+import com.mygdx.game.util.CoordinateUtils;
+import com.mygdx.game.util.MapSaver;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class InputProcessing implements InputProcessor {
 
@@ -21,6 +26,33 @@ public class InputProcessing implements InputProcessor {
         keyDownMap = new IntMap<>();
         keyUpMap = new IntMap<>();
         keyTypedMap = new IntMap<>();
+
+        AtomicInteger octaveCount = new AtomicInteger(1);
+
+        keyDownMap.put(Input.Keys.A, () -> {
+            octaveCount.getAndIncrement();
+            Gdx.app.log("InputProcessing#InputProcessing", "octave count = " + octaveCount.get());
+        });
+
+        keyDownMap.put(Input.Keys.D, () -> {
+            octaveCount.getAndDecrement();
+            if (octaveCount.get() < 0) {
+                octaveCount.set(0);
+            }
+            Gdx.app.log("InputProcessing#InputProcessing", "octave count = " + octaveCount.get());
+        });
+
+        MapSaver saver = new MapSaver(MyGdxGame.API().getWorld().worldMap);
+
+        keyDownMap.put(Input.Keys.ENTER, () -> {
+            Gdx.app.log("InputProcessing#InputProcessing", "exporting the current map");
+            saver.saveMap();
+        });
+
+        keyDownMap.put(Input.Keys.SPACE, () -> {
+            MyGdxGame.API().getWorld().worldMap.generateMap(octaveCount.get());
+
+        });
 
         keyDownMap.put(Input.Keys.SHIFT_LEFT, () -> {
             selectByDrag = true;

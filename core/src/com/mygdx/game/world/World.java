@@ -1,9 +1,10 @@
-package com.mygdx.game;
+package com.mygdx.game.world;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.AnimatedGameActor;
 import com.mygdx.game.entities.GameActor;
 import com.mygdx.game.entities.GameActorFactory;
@@ -14,8 +15,8 @@ import com.mygdx.game.events.MouseMovedEvent;
 import com.mygdx.game.events.management.EventHandler;
 import com.mygdx.game.events.management.EventManager;
 import com.mygdx.game.events.management.Observer;
-import com.mygdx.game.map.PathFinder;
-import com.mygdx.game.map.WorldMap;
+import com.mygdx.game.world.map.PathFinder;
+import com.mygdx.game.world.map.WorldMap;
 
 import java.util.Comparator;
 
@@ -28,7 +29,7 @@ public class World implements Observer {
     public World() {
         EventManager.getInstance().registerObserver(this);
         worldMap = new WorldMap();
-        worldMap.generateMap(1);
+        worldMap.generateMap(2);
         entities = new Array<>();
         isometricComparator = (o1, o2) -> Float.compare(o2.getY(), o1.getY());
         PathFinder.generateGraph(worldMap.getTileMap(), true);

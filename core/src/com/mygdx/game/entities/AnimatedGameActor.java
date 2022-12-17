@@ -1,14 +1,13 @@
 package com.mygdx.game.entities;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.pfa.GraphPath;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.ColorUtil;
 import com.mygdx.game.MyGdxGame;
-import com.mygdx.game.map.PathFinder;
+import com.mygdx.game.util.ColorUtil;
+import com.mygdx.game.world.map.PathFinder;
 
 public class AnimatedGameActor extends GameActor {
     protected GraphPath<PathFinder.Node> path;
