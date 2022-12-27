@@ -22,7 +22,7 @@ public class WorldMap {
     private static final Vector2 CENTER = CoordinateUtils.tileToScreen(WIDTH / 2, HEIGHT / 2);
     private int prevSelectionRow = -1;
     private int prevSelectionCol = -1;
-    private final Pool<Tile> selectionTilePool = new Pool<>(INITIAL_CAPACITY, WIDTH * HEIGHT) {
+    private final Pool<Tile> selectionTilePool = new Pool<Tile>(INITIAL_CAPACITY, WIDTH * HEIGHT) {
         @Override
         protected Tile newObject() {
             return new Tile(GREEN_INDICATOR);

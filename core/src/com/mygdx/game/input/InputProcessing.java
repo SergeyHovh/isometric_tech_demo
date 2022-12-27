@@ -10,7 +10,6 @@ import com.mygdx.game.events.MouseDraggedEvent;
 import com.mygdx.game.events.MouseMovedEvent;
 import com.mygdx.game.events.management.EventManager;
 import com.mygdx.game.util.CoordinateUtils;
-import com.mygdx.game.util.MapSaver;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,13 +39,6 @@ public class InputProcessing implements InputProcessor {
                 octaveCount.set(0);
             }
             Gdx.app.log("InputProcessing#InputProcessing", "octave count = " + octaveCount.get());
-        });
-
-        MapSaver saver = new MapSaver(MyGdxGame.API().getWorld().worldMap);
-
-        keyDownMap.put(Input.Keys.ENTER, () -> {
-            Gdx.app.log("InputProcessing#InputProcessing", "exporting the current map");
-            saver.saveMap();
         });
 
         keyDownMap.put(Input.Keys.SPACE, () -> {
