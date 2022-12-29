@@ -9,7 +9,11 @@ import com.badlogic.gdx.ai.pfa.indexed.IndexedGraph;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.events.PathGraphChangeEvent;
+import com.mygdx.game.events.management.EventManager;
 import com.mygdx.game.util.CoordinateUtils;
+
+import java.util.Objects;
 
 public class PathFinder {
     private static Graph graph;
@@ -92,6 +96,17 @@ public class PathFinder {
         return path;
     }
 
+    public static void removeConnection(Vector2 nodePos) {
+        Node startNode = null;
+        for (Node node : graph.getNodes().toArray(Node.class)) {
+            if (nodePos.dst(node.tilePos) == 0) {
+                startNode = node;
+            }
+        }
+
+        graph.removeConnections(startNode);
+    }
+
     private static boolean isPassable(Node node, Tile[][] map) {
         int i = (int) node.tilePos.x;
         int j = (int) node.tilePos.y;
@@ -104,6 +119,21 @@ public class PathFinder {
 
         public Graph(Array<Node> nodes) {
             this.nodes = nodes;
+        }
+
+        private void removeConnections(Node node) {
+            if (node == null) return;
+            for (Connection<Node> connection : nodes.get(node.index).connections) {
+                Node toNode = connection.getToNode();
+                for (Connection<Node> nodeConnection : toNode.connections) {
+                    if (nodeConnection.getToNode().equals(node)) {
+                        toNode.connections.removeValue(nodeConnection, false);
+                    }
+                }
+            }
+            nodes.get(node.index).connections.clear();
+            PathGraphChangeEvent pathGraphChangeEvent = EventManager.getInstance().obtainEvent(PathGraphChangeEvent.class);
+            EventManager.getInstance().fireEvent(pathGraphChangeEvent);
         }
 
         @Override
@@ -149,6 +179,19 @@ public class PathFinder {
             this.index = index;
             this.cost = cost;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Node node = (Node) o;
+            return index == node.index && Objects.equals(pos, node.pos) && Objects.equals(tilePos, node.tilePos);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(pos, tilePos, index);
+        }
     }
 
     private static class NodeConnection implements Connection<Node> {
@@ -178,6 +221,19 @@ public class PathFinder {
         @Override
         public Node getToNode() {
             return toNode;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NodeConnection that = (NodeConnection) o;
+            return Objects.equals(fromNode, that.fromNode) && Objects.equals(toNode, that.toNode);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(fromNode, toNode);
         }
     }
 }

@@ -6,10 +6,14 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.events.PathGraphChangeEvent;
+import com.mygdx.game.events.management.EventHandler;
+import com.mygdx.game.events.management.EventManager;
+import com.mygdx.game.events.management.Observer;
 import com.mygdx.game.util.ColorUtil;
 import com.mygdx.game.world.map.PathFinder;
 
-public class AnimatedGameActor extends GameActor {
+public class AnimatedGameActor extends GameActor implements Observer {
     protected GraphPath<PathFinder.Node> path;
     protected int currentPathIndex = 0;
     private Color color = Color.WHITE;
@@ -20,9 +24,13 @@ public class AnimatedGameActor extends GameActor {
     private float attackCooldownTimer = 0;
     private AnimatedGameActor attackEntity;
     private boolean shouldAttack = false;
+    private int toX = -1;
+    private int toY = -1;
+    private GameActor actorToFollow = null;
 
     public AnimatedGameActor(int id) {
         super(id, id + 1);
+        EventManager.getInstance().registerObserver(this);
     }
 
     @Override
@@ -89,7 +97,7 @@ public class AnimatedGameActor extends GameActor {
             }
             return;
         }
-        if (Vector2.dst(x, y, targetX, targetY) <= 8) {
+        if (Vector2.dst(x, y, targetX, targetY) <= 1) {
             chooseNextDestination();
         }
     }
@@ -107,7 +115,10 @@ public class AnimatedGameActor extends GameActor {
     private void chooseNextDestination() {
         if (path == null) return;
         if (currentPathIndex + 1 > path.getCount() - 1) {
+            actorToFollow = null;
             path = null;
+            toX = -1;
+            toY = -1;
             return;
         }
         PathFinder.Node current = path.get(currentPathIndex);
@@ -118,10 +129,13 @@ public class AnimatedGameActor extends GameActor {
     }
 
     public void followGameActor(GameActor gameActor) {
+        actorToFollow = gameActor;
         findPathAndMove(gameActor.getTileX(), gameActor.getTileY());
     }
 
     public void findPathAndMove(int toX, int toY) {
+        this.toX = toX;
+        this.toY = toY;
         GameActor gameActor = MyGdxGame.API().getWorld().containsGameActor(toX, toY);
         if (gameActor != null) {
             // find the closest adjacent tile other than the selected one
@@ -142,10 +156,26 @@ public class AnimatedGameActor extends GameActor {
                     }
                 }
             }
-            toX += closestX;
-            toY += closestY;
+            this.toX += closestX;
+            this.toY += closestY;
         }
-        findPathAndMove(getTileX(), getTileY(), toX, toY);
+        findPathAndMove(getTileX(), getTileY(), this.toX, this.toY);
+    }
+
+    @EventHandler
+    public void onPathGraphChangeEvent(PathGraphChangeEvent event) {
+        updatePathfinding();
+    }
+
+    private void updatePathfinding() {
+        if (actorToFollow != null) {
+            followGameActor(actorToFollow);
+            return;
+        }
+        if (toX != -1 && toY != -1) {
+            findPathAndMove(toX, toY);
+            return;
+        }
     }
 
     protected void findPathAndMove(int fromX, int fromY, int toX, int toY) {
